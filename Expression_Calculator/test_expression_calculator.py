@@ -81,9 +81,9 @@ def test_validate():
     # Caracteres inválidos
     assert (Util.validate("a") is False)
     assert (Util.validate("(0,1+-,2/5.)") is False)  # separador decimal != ','
-    assert (Util.validate("(((01,23+-,4*5,6/7-8+9,))))+A") is False)
+    assert (Util.validate("(01,23+-,4*5,6/7-8+9,)+A") is False)
     # Parênteses sem par
-    assert (Util.validate("(((1+2))") is False)
+    assert (Util.validate("(((1+2))") is False)      # '(' > ')'
     assert (Util.validate("(((01,23+-,4*5,6/7-8+9,))))") is False)
     # Todos caracteres válidos
     assert (Util.validate("0") is True)
@@ -200,6 +200,9 @@ def test_resolve():
     assert (t.resolve("2000 1 2 / +") == "2000.5")
     assert (t.resolve("2 2 + 4 5 * + 1 1000 / +") == "24.001")
     assert (t.resolve("1,5 2,5 + 3 + 2,5 2,5 + -") == "2.0")
+    assert (t.resolve("100 200 + 2 / 5 * 7 +") == "757.0")
+    assert (t.resolve("2 3 1 * + 9 -") == "-4.0")
+    assert (t.resolve("10 2 8 * + 3 -") == "23.0")
     print("test_resolve ... ok")
 
 
@@ -223,6 +226,7 @@ def test_calc():
     assert (t.calc("5*-10+20-5") == -35)
     assert (t.calc("2000+1/2") == 2000.5)
     assert (t.calc("2+2+4*5+1/1000") == 24.001)
+    assert (t.calc("((10 + (2 * 8)) - 3)") == 23.0)
     print("test_calc ... ok")
 
 

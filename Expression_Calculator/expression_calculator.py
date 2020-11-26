@@ -272,14 +272,14 @@ class ExpressionCalculator():
 
     def prepare(self, expression):
         """
-        Format operators joined to negative numbers.
+        Adequate input expression.
 
         :param expression: string
-        :return string (expression with checked operators)
+        :return string (checked)
         """
 
         # Tratar sinal no início
-        if expression[0] is '-' or expression[0] is '+':
+        if expression[0] == '-' or expression[0] == '+':
             expression = "0" + expression
 
         # Tratar números negativos
