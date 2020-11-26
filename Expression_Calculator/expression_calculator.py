@@ -23,7 +23,7 @@ class Util():
     RPARENTHESES = ')'
 
     OPERAND = DIGITS + SEPARATOR
-    POSTFIX = OPERAND + OPERATOR + SPACE
+    POSTFIX = OPERAND + OPERATOR
     ALL = OPERAND + OPERATOR + LPARENTHESES + RPARENTHESES + SPACE
 
     def isNullOrEmpty(expression):
@@ -108,7 +108,7 @@ class ExpressionCalculator():
         :return float
         """
 
-        # InFixo para PosFixo
+        # InFixo para PosFixo, delimitador padrão (espaço)
         postfix = self.postFix(expression)
 
         # Valor em string, número ou ERROR
@@ -133,7 +133,8 @@ class ExpressionCalculator():
             return self.ERROR
 
         # Validar caracteres: considerar entrada de espaços
-        if not Util.validate(expression=postfix, characters=Util.POSTFIX):
+        chars = Util.POSTFIX + delim
+        if not Util.validate(expression=postfix, characters=chars):
             return self.ERROR
 
         # Preparar
@@ -210,7 +211,7 @@ class ExpressionCalculator():
 
         # Converter
         stack = ""
-        postfix = Util.SPACE
+        postfix = delim
 
         for i in range(0, len(infix)):
             # Caracter
@@ -227,7 +228,7 @@ class ExpressionCalculator():
                 continue
 
             # Delimitar
-            postfix += Util.SPACE if postfix[-1] != Util.SPACE else ""
+            postfix += delim if postfix[-1] != delim else ""
 
             # Parênteses
             if c == Util.LPARENTHESES:
@@ -236,7 +237,7 @@ class ExpressionCalculator():
             if c == Util.RPARENTHESES:
                 while stack[-1] != Util.LPARENTHESES:
                     # Delimitar
-                    postfix += Util.SPACE if postfix[-1] != Util.SPACE else ""
+                    postfix += delim if postfix[-1] != delim else ""
                     # add, topo
                     postfix += stack[-1]
                     # pop, operador
@@ -249,11 +250,9 @@ class ExpressionCalculator():
                 while (len(stack) > 0 and stack[-1] != Util.LPARENTHESES
                        and PRECEDENCE[c] <= PRECEDENCE[stack[-1]]):
                     # Delimitar
-                    postfix += Util.SPACE if postfix[-1] != Util.SPACE else ""
+                    postfix += delim if postfix[-1] != delim else ""
                     # add, topo
-                    postfix += stack[-1]
-                    # Delimitar
-                    postfix += Util.SPACE if postfix[-1] != Util.SPACE else ""
+                    postfix += stack[-1] + delim
                     # pop
                     stack = stack[:-1]
                 # push, operador
@@ -261,7 +260,7 @@ class ExpressionCalculator():
 
         while len(stack) > 0:
             # Delimitar
-            postfix += Util.SPACE if postfix[-1] != Util.SPACE else ""
+            postfix += delim if postfix[-1] != delim else ""
             # add, topo
             postfix += stack[-1]
             # pop

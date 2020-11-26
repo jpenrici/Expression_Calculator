@@ -230,8 +230,17 @@ def test_calc():
     print("test_calc ... ok")
 
 
+def test_extra():
+    # Outro delimitador
+    t = ExpressionCalculator()
+    postfix = t.postFix(infix="1+2*5,0+-1", delim="|")
+    assert (float(t.resolve(postfix=postfix, delim="|")) == 10)
+    print("test_extra ... ok")
+
+
 if __name__ == '__main__':
 
+    # Principal
     test_ERROR()
     test_isNullOrEmpty()
     test_isNumber()
@@ -240,3 +249,6 @@ if __name__ == '__main__':
     test_postFix()
     test_resolve()
     test_calc()
+
+    # Extra
+    test_extra()
