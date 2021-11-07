@@ -6,103 +6,75 @@ import java.util.Stack;
 
 public class Calculator {
 
-    protected final String ERROR = "ERROR";
-    static final String WSPACE = " ";
-    static final String EMPTY = "";
-    static final char DELIM = ' ';
-    static final char SPACE = ' ';
-    static final char DOT = '.';
+    protected static final String ERROR = "ERROR";
+    protected static final String SPACE = " ";
+    protected static final String EMPTY = "";
 
-    static final String DIGITS = "0123456789";
-    static final char SEPARATOR = ',';
+    protected static final char SEPARATOR = ',';
+    protected static final char DELIMITER = ' ';
 
-    static final String OPERATOR = "+-*/";
-    static final char LPARENTHESES = '(';
-    static final char RPARENTHESES = ')';
+    private static final String DIGITS = "0123456789";
+    private static final String OPERATOR = "+-*/";
+    private static final String SIGNAL = "+-";
 
-    static final String OPERAND = DIGITS + SEPARATOR;
-    static final String POSTFIX = OPERAND + OPERATOR;
-    static final String ALL = POSTFIX + LPARENTHESES + RPARENTHESES + SPACE;
+    private static final char LPARENTHESES = '(';
+    private static final char RPARENTHESES = ')';
+    private static final char POSITIVE = '+';
+    private static final char NEGATIVE = '-';
+    private static final char DOT = '.';
 
-    static int precedence(char key) {
-        switch (key) {
-            case '*':
-            case '/':
-                return 3;
-            case '+':
-            case '-':
-                return 2;
-            case '(':
-                return 1;
-            default:
-                return 0;
-        }
+    private static final String NUMBER = DIGITS + SEPARATOR;
+    private static final String POSTFIX = NUMBER + OPERATOR;
+    private static final String ALL = POSTFIX + LPARENTHESES + RPARENTHESES + DELIMITER;
+
+    private String currentCharacters;
+    private char currentDelimiter;
+
+    public Calculator() {
+        currentCharacters = ALL;
+        currentDelimiter = DELIMITER;
     }
 
-    String[] split(String str, char delimiter) {
-        str = str.replace(delimiter, ';');
-        return str.split(";");
+    public Calculator(char currentDelimiter) {
+        setCurrentDelimiter(currentDelimiter);
     }
 
-    public String expressionCalc(String expression) {
+    public void setCurrentDelimiter(char currentDelimiter) {
+        this.currentDelimiter = currentDelimiter;
+        currentCharacters = POSTFIX + LPARENTHESES + RPARENTHESES + currentDelimiter;
+    }
 
-        // InFixo para PosFixo, delimitador padrão (espaço)
-        String postfix = postFix(expression, SPACE);
+    public String calculate(String expression) {
+        return resolve(postFix(expression));
+    }
 
-        // Valor em string, número ou ERROR
-        String result = resolve(postfix, SPACE);
+    protected String resolve(String postfixExpression) {
 
-        if (result.equals("ERROR")) {
+        if (isNullOrEmpty(postfixExpression)) {
             return ERROR;
         }
 
-        String[] array = split(result, SEPARATOR);
-        if (array.length == 1) {
-            result += ",0";
-        }
-
-        return result;
-    }
-
-    protected String resolve(String postfix, char delimiter) {
-
-        // Validar entrada Posfixa
-        if (isNullOrEmpty(postfix)) {
+        if (!expressionIsValid(postfixExpression, true)) {
             return ERROR;
         }
 
-        // Validar caracteres
-        if (!validate(postfix, POSTFIX + delimiter)) {
-            return ERROR;
-        }
-
-        // Preparar
         List<String> tokens = new ArrayList<>();
-        for (var token : split(postfix, delimiter)) {
-            // Excluir vazios
-            if (!token.replace(WSPACE, EMPTY).isEmpty())
+        String[] array = postfixExpression.replace(currentDelimiter, ';').split(";");
+        for (String token : array) {
+            if (!token.replace(SPACE, EMPTY).isEmpty()) {
                 tokens.add(token);
+            }
         }
 
         if (tokens.size() == 0) {
             return ERROR;
         }
 
-        if (tokens.size() == 1) {
-            if (isNumber(tokens.get(0)))
-                return tokens.get(0);
-            else
-                return ERROR;
-        }
-
-        // Resolver
         Stack<Double> numbers = new Stack<>();
         for (String token : tokens) {
             if (OPERATOR.contains(token)) {
-                // Operandos
-                var operand2 = numbers.pop();
-                var operand1 = numbers.pop();
-                // Calcular
+                Double operand2 = numbers.pop();
+                Double operand1 = numbers.pop();
                 switch (token) {
                     case "+":
                         numbers.push(operand1 + operand2);
@@ -121,8 +93,11 @@ public class Calculator {
                         break;
                 }
             } else {
-                double num = Double.parseDouble(token.replace(SEPARATOR, DOT));
-                numbers.push(num);
+                try {
+                    numbers.push(Double.parseDouble(token.replace(SEPARATOR, DOT)));
+                } catch (Exception e) {
+                    return ERROR;
+                }
             }
         }
 
@@ -130,116 +105,113 @@ public class Calculator {
             return ERROR;
 
         String result = numbers.pop().toString().replace(DOT, SEPARATOR);
-        String[] s = split(result, SEPARATOR);
-        if (s.length == 2) {
-            if (Integer.parseInt(s[s.length - 1]) == 0) {
-                result = s[0];
+        array = result.replace(SEPARATOR, ';').split(";");
+        if (array.length == 2) {
+            if (Integer.parseInt(array[1]) == 0) {
+                result = array[0] + ",0";
             }
         }
 
-        return result.replace(DOT, SEPARATOR);
+        return result;
     }
 
-    protected String resolve(String infix) {
-        return resolve(infix, DELIM);
+    private static int precedence(char key) {
+        switch (key) {
+            case '*':
+            case '/':
+                return 3;
+            case '+':
+            case '-':
+                return 2;
+            case '(':
+                return 1;
+            default:
+                return 0;
+        }
     }
 
-    protected String postFix(String infix, char delimiter) {
+    protected String postFix(String expression) {
 
-        if (isNullOrEmpty(infix)) {
+        if (isNullOrEmpty(expression)) {
             return ERROR;
         }
 
-        // Preparação inicial
-        infix = infix.replace(WSPACE, EMPTY);
-
-        // Validar caracteres
-        if (!validate(infix)) {
+        expression = prepare(expression);
+        if (!expressionIsValid(expression)) {
             return ERROR;
         }
-
-        // Adequar entrada
-        infix = prepare(infix);
 
         // Converter
         Stack<Character> stack = new Stack<>();
-        StringBuilder postfix = new StringBuilder(String.valueOf(delimiter));
+        StringBuilder postfixExpression = new StringBuilder(String.valueOf(currentDelimiter));
 
-        for (int i = 0; i < infix.length(); i++) {
-            char c = infix.charAt(i);
+        for (int i = 0; i < expression.length(); i++) {
+            char c = expression.charAt(i);
 
-            // Vazio
-            if (c == SPACE) {
+            if (c == DELIMITER) {
                 continue;
             }
 
-            // Operando
-            if (OPERAND.contains(String.valueOf(c))) {
-                postfix.append(c);
+            if (NUMBER.contains(String.valueOf(c))) {
+                postfixExpression.append(c);
                 continue;
             }
 
-            if (postfix.charAt(postfix.length() - 1) != delimiter) {
-                postfix.append(delimiter);
+            if (postfixExpression.charAt(postfixExpression.length() - 1) != currentDelimiter) {
+                postfixExpression.append(currentDelimiter);
             }
 
-            // Parênteses
             if (c == LPARENTHESES) {
                 stack.push(c);
             }
             if (c == RPARENTHESES) {
                 while (stack.peek() != LPARENTHESES) {
-                    if (postfix.charAt(postfix.length() - 1) != delimiter)
-                        postfix.append(delimiter);
-                    postfix.append(stack.pop().toString());
+                    if (postfixExpression.charAt(postfixExpression.length() - 1) != currentDelimiter)
+                        postfixExpression.append(currentDelimiter);
+                    postfixExpression.append(stack.pop().toString());
                 }
                 stack.pop();
             }
 
-            // Operador
             if (OPERATOR.contains(String.valueOf(c))) {
                 while (stack.size() > 0 && stack.peek() != LPARENTHESES &&
                         precedence(c) <= precedence(stack.peek())) {
-                    if (postfix.charAt(postfix.length() - 1) != delimiter)
-                        postfix.append(delimiter);
-                    postfix.append(stack.pop().toString()).append(delimiter);
+                    if (postfixExpression.charAt(postfixExpression.length() - 1) != currentDelimiter)
+                        postfixExpression.append(currentDelimiter);
+                    postfixExpression.append(stack.pop().toString()).append(currentDelimiter);
                 }
                 stack.push(c);
             }
         }
 
         while (stack.size() > 0) {
-            if (postfix.charAt(postfix.length() - 1) != delimiter)
-                postfix.append(delimiter);
-            postfix.append(stack.pop().toString());
+            if (postfixExpression.charAt(postfixExpression.length() - 1) != currentDelimiter)
+                postfixExpression.append(currentDelimiter);
+            postfixExpression.append(stack.pop().toString());
         }
 
-        if (postfix.length() > 1) {
-            if (postfix.charAt(0) == delimiter) {
-                postfix = new StringBuilder(postfix.substring(1));
+        if (postfixExpression.length() > 1) {
+            if (postfixExpression.charAt(0) == currentDelimiter) {
+                postfixExpression = new StringBuilder(postfixExpression.substring(1));
             }
         }
 
-        return postfix.toString();
-    }
-
-    protected String postFix(String infix) {
-        return postFix(infix, DELIM);
-    }
-
-    protected String postFix(int infix) {
-        return postFix(String.valueOf(infix));
-    }
-
-    protected String postFix(double infix) {
-        return postFix(String.valueOf(infix).replace(DOT, SEPARATOR));
+        return postfixExpression.toString();
     }
 
     protected String prepare(String expression) {
 
+        if (isNullOrEmpty(expression)) {
+            return EMPTY;
+        }
+
+        // Remover espaços
+        expression = expression.replace(SPACE, EMPTY);
+
         // Tratar sinal no início
-        if (expression.charAt(0) == '-' || expression.charAt(0) == '+')
+        if (expression.charAt(0) == POSITIVE || expression.charAt(0) == NEGATIVE) {
             expression = "0" + expression;
+        }
 
         // Tratar números com sinais
         expression = expression.replace("--", "+");
@@ -253,31 +225,56 @@ public class Calculator {
         return expression;
     }
 
-    protected boolean validate(String expression, String characters) {
+    protected boolean expressionIsValid(String expression, boolean isPostFix) {
 
-        if (isNullOrEmpty(expression))
+        if (isNullOrEmpty(expression)) {
             return false;
-
-        int lpar = 0;
-        int rpar = 0;
-        for (int i = 0; i < expression.length(); i++) {
-            char c = expression.charAt(i);
-            if (!characters.contains(String.valueOf(c))) {
-                return false;
-            }
-            if (c == LPARENTHESES) {
-                lpar++;
-            }
-            if (c == RPARENTHESES) {
-                rpar++;
-            }
         }
 
-        return lpar == rpar;
+        String first = DIGITS + SIGNAL + LPARENTHESES;
+        String last = DIGITS + RPARENTHESES;
+
+        if (isPostFix) {
+            first = DIGITS;
+            last = DIGITS + OPERATOR;
+        }
+
+        if (!first.contains(String.valueOf(expression.charAt(0)))) {
+            return false;
+        }
+
+        if (!last.contains(String.valueOf(expression.charAt(expression.length() - 1)))) {
+            return false;
+        }
+
+        if (!isPostFix) {
+            int digitCounter = 0;
+            int leftParenthesisCounter = 0;
+            int rightParenthesisCounter = 0;
+            for (int i = 0; i < expression.length(); i++) {
+                char c = expression.charAt(i);
+                if (!currentCharacters.contains(String.valueOf(c))) {
+                    return false;
+                }
+                if (DIGITS.contains(String.valueOf(c))) {
+                    digitCounter++;
+                }
+                if (c == LPARENTHESES) {
+                    leftParenthesisCounter++;
+                }
+                if (c == RPARENTHESES) {
+                    rightParenthesisCounter++;
+                }
+            }
+
+            return leftParenthesisCounter == rightParenthesisCounter && digitCounter > 0;
+        }
+
+        return true;
     }
 
-    protected boolean validate(String expression) {
-        return validate(expression, ALL);
+    protected boolean expressionIsValid(String expression) {
+        return expressionIsValid(expression, false);
     }
 
     protected boolean isNumber(String value) {
@@ -286,61 +283,14 @@ public class Calculator {
             return false;
         }
 
-        char first = value.charAt(0);
-        char last = value.charAt(value.length() - 1);
+        boolean isInteger = value.matches("[+-]?[0-9]+");
+        boolean isFloat = value.matches("[+-]?[0-9]+" + SEPARATOR + "[0-9]+");
 
-        if (first == '-' || first == '+') {
-            return isNumber(value.substring(1));
-        }
-
-        if (!DIGITS.contains(String.valueOf(first)) || !DIGITS.contains(String.valueOf(last))) {
-            return false;
-        }
-
-        int counter = 0;  // parênteses
-        for (int i = 0; i < value.length(); i++) {
-            char c = value.charAt(i);
-            if (!OPERAND.contains(String.valueOf(c)) || counter > 1)
-                return false;
-            if (c == SEPARATOR)
-                counter += 1;
-        }
-
-        return true;
-    }
-
-    protected boolean isNumber(int value) {
-        return isNumber(String.valueOf(value));
-    }
-
-    protected boolean isNumber(float value) {
-        return isNumber((double) value);
-    }
-
-    protected boolean isNumber(double value) {
-        String num = String.valueOf(value).replace(DOT, SEPARATOR);
-        return isNumber(num);
+        return isInteger || isFloat;
     }
 
     protected boolean isNullOrEmpty(String expression) {
-
-        if (expression == null) {
-            return true;
-        }
-
-        return expression.isEmpty() || expression.isBlank();
-    }
-
-    protected boolean isNullOrEmpty(int expression) {
-        return isNullOrEmpty(String.valueOf(expression));
-    }
-
-    protected boolean isNullOrEmpty(float expression) {
-        return isNullOrEmpty(String.valueOf(expression));
-    }
-
-    protected boolean isNullOrEmpty(double expression) {
-        return isNullOrEmpty(String.valueOf(expression));
+        return expression == null || expression.replace(SPACE, EMPTY).isEmpty();
     }
 
 }

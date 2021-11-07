@@ -4,234 +4,258 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
-class CalculatorTest {
+import org.junit.Test;
 
-    private final Calculator t = new Calculator();
+public class CalculatorTest {
 
-    protected void Error() {
-        assertEquals(t.ERROR, "ERROR");
+    private final Calculator calculator = new Calculator();
+
+    @Test
+    public void isNullOrEmpty() {
+        assertTrue(calculator.isNullOrEmpty(""));
+        assertTrue(calculator.isNullOrEmpty(" "));
+        assertTrue(calculator.isNullOrEmpty(null));
+        assertFalse(calculator.isNullOrEmpty("0"));
     }
 
-    protected void isNullOrEmpty() {
-        // Nulo ou vazio
-        assertTrue(t.isNullOrEmpty(""));
-        assertTrue(t.isNullOrEmpty(" "));
-        assertTrue(t.isNullOrEmpty(null));
-        // Preenchido com string
-        assertFalse(t.isNullOrEmpty("a"));
-        assertFalse(t.isNullOrEmpty("-"));
-        assertFalse(t.isNullOrEmpty("0"));
-        assertFalse(t.isNullOrEmpty("-1"));
-        assertFalse(t.isNullOrEmpty("1+1"));
-        assertFalse(t.isNullOrEmpty("(10+10.1)"));
-        // Preenchido por conversão
-        assertFalse(t.isNullOrEmpty(0));           // valor inteiro
-        assertFalse(t.isNullOrEmpty(-1));          // valor negativo
-        assertFalse(t.isNullOrEmpty(10.1));        // valor fracionado
-        assertFalse(t.isNullOrEmpty((float) 10.1));         // valor fracionado
-        assertFalse(t.isNullOrEmpty((float) -10.1));        // valor fracionado
-        assertFalse(t.isNullOrEmpty(10 + 10.1));   // cálculo
-    }
-
-    protected void numbers() {
+    @Test
+    public void numbers() {
         // Não numéricos
-        assertFalse(t.isNumber(""));
-        assertFalse(t.isNumber(" "));
-        assertFalse(t.isNumber(null));
-        assertFalse(t.isNumber("A"));
-        assertFalse(t.isNumber("-"));
-        assertFalse(t.isNumber("+"));
-        assertFalse(t.isNumber(","));
-        assertFalse(t.isNumber("-,"));
-        assertFalse(t.isNumber("(10+10.1)"));     // expressão
+        assertFalse(calculator.isNumber(""));
+        assertFalse(calculator.isNumber(" "));
+        assertFalse(calculator.isNumber(null));
+        assertFalse(calculator.isNumber("A"));
+        assertFalse(calculator.isNumber("-"));
+        assertFalse(calculator.isNumber("+"));
+        assertFalse(calculator.isNumber("*"));
+        assertFalse(calculator.isNumber("/"));
+        assertFalse(calculator.isNumber("("));
+        assertFalse(calculator.isNumber(")"));
+        assertFalse(calculator.isNumber(","));
+        assertFalse(calculator.isNumber("."));
+        assertFalse(calculator.isNumber("-,"));
+        assertFalse(calculator.isNumber("(10+10.1)"));     // expressão
         // Numéricos com erros
-        assertFalse(t.isNumber("0.1"));           // separador decimal != ','
-        assertFalse(t.isNumber(".1"));
-        assertFalse(t.isNumber("1."));
-        assertFalse(t.isNumber(",1"));            // erro digitação
-        assertFalse(t.isNumber("1,"));
-        assertFalse(t.isNumber("-1,"));
-        assertFalse(t.isNumber("-,1"));
-        assertFalse(t.isNumber("0,,1"));
-        assertFalse(t.isNumber("0,0,1"));
-        assertFalse(t.isNumber(",,1"));
-        assertFalse(t.isNumber("1 "));
-        assertFalse(t.isNumber(" 1"));
-        assertFalse(t.isNumber("1A"));
-        assertFalse(t.isNumber("0,A"));
+        assertFalse(calculator.isNumber("0.1"));           // separador decimal != ','
+        assertFalse(calculator.isNumber(".1"));
+        assertFalse(calculator.isNumber("1."));
+        assertFalse(calculator.isNumber(",1"));            // erro digitação
+        assertFalse(calculator.isNumber("1,"));
+        assertFalse(calculator.isNumber("-1,"));
+        assertFalse(calculator.isNumber("-,1"));
+        assertFalse(calculator.isNumber("*1"));
+        assertFalse(calculator.isNumber("/1"));
+        assertFalse(calculator.isNumber("(1"));
+        assertFalse(calculator.isNumber("1)"));
+        assertFalse(calculator.isNumber("0,,1"));
+        assertFalse(calculator.isNumber("-1,1,"));
+        assertFalse(calculator.isNumber("+1,1,"));
+        assertFalse(calculator.isNumber("0,0,1"));
+        assertFalse(calculator.isNumber(",,1"));
+        assertFalse(calculator.isNumber("1 "));
+        assertFalse(calculator.isNumber(" 1"));
+        assertFalse(calculator.isNumber("1A"));
+        assertFalse(calculator.isNumber("0,A"));
         // String numéricas
-        assertTrue(t.isNumber("0"));
-        assertTrue(t.isNumber("1"));
-        assertTrue(t.isNumber("-1"));
-        assertTrue(t.isNumber("+1"));
-        assertTrue(t.isNumber("10"));
-        assertTrue(t.isNumber("0,1"));
-        // Numéricos
-        assertTrue(t.isNumber(10));
-        assertTrue(t.isNumber(-10));
-        assertTrue(t.isNumber(10.1));
-        assertTrue(t.isNumber(-10.1));
-        assertTrue(t.isNumber((float) 10.1));
-        assertTrue(t.isNumber((float) -10.1));
-        assertTrue(t.isNumber(10 + 10.1));
+        assertTrue(calculator.isNumber("0"));
+        assertTrue(calculator.isNumber("1"));
+        assertTrue(calculator.isNumber("-1"));
+        assertTrue(calculator.isNumber("+1"));
+        assertTrue(calculator.isNumber("10"));
+        assertTrue(calculator.isNumber("0,1"));
+        assertTrue(calculator.isNumber("-1,1"));
+        assertTrue(calculator.isNumber("+1,1"));
     }
 
-    protected void validate() {
+    @Test
+    public void validate() {
         // Nulo ou vazio
-        assertFalse(t.validate(""));
-        assertFalse(t.validate(" "));
-        assertFalse(t.validate(null));
+        assertFalse(calculator.expressionIsValid(""));
+        assertFalse(calculator.expressionIsValid(" "));
+        assertFalse(calculator.expressionIsValid(null));
         // Caracteres inválidos
-        assertFalse(t.validate("a"));
-        assertFalse(t.validate("(0,1+-,2/5.)"));  // separador decimal != ','
-        assertFalse(t.validate("(01,23+-,4*5,6/7-8+9,)+A"));
+        assertFalse(calculator.expressionIsValid("a"));
+        assertFalse(calculator.expressionIsValid("(0,1+-,2/5.)"));  // separador decimal != ','
+        assertFalse(calculator.expressionIsValid("(01,23+-,4*5,6/7-8+9,)+A"));
         // Parênteses sem par
-        assertFalse(t.validate("(((1+2))"));      // '(' > ')'
-        assertFalse(t.validate("(((01,23+-,4*5,6/7-8+9,))))"));
+        assertFalse(calculator.expressionIsValid("(((1+2))"));      // '(' > ')'
+        assertFalse(calculator.expressionIsValid("(((01,23+-,4*5,6/7-8+9,))))"));
         // Somente caracteres válidos
-        assertTrue(t.validate("0"));
-        assertTrue(t.validate("-"));
-        assertTrue(t.validate("-1"));
-        assertTrue(t.validate("0+1"));
-        assertTrue(t.validate("+(-1)"));
-        assertTrue(t.validate("+ ( - 1 )"));
+        assertFalse(calculator.expressionIsValid("-"));
+        assertFalse(calculator.expressionIsValid("*"));
+        assertFalse(calculator.expressionIsValid("/"));
+        assertFalse(calculator.expressionIsValid("+"));
+        assertFalse(calculator.expressionIsValid("("));
+        assertFalse(calculator.expressionIsValid(")"));
+        assertFalse(calculator.expressionIsValid("()"));
+        assertFalse(calculator.expressionIsValid("( )"));
+        assertFalse(calculator.expressionIsValid("*1"));
+        assertFalse(calculator.expressionIsValid("/1"));
+        assertFalse(calculator.expressionIsValid(")1"));
+        assertFalse(calculator.expressionIsValid("(1"));
+        assertFalse(calculator.expressionIsValid("1 )"));
+        assertFalse(calculator.expressionIsValid("* 1"));
+        assertFalse(calculator.expressionIsValid("( 1 - "));
+        assertFalse(calculator.expressionIsValid(" 0"));    // não permitir iniciar com espaço
+        assertTrue(calculator.expressionIsValid("0"));
+        assertTrue(calculator.expressionIsValid("-1"));
+        assertTrue(calculator.expressionIsValid("- 1"));    // permitir se todos caracteres válidos
+        assertTrue(calculator.expressionIsValid("0+1"));
+        assertTrue(calculator.expressionIsValid("- 0 +1"));
+        assertTrue(calculator.expressionIsValid("+(-1)"));
+        assertTrue(calculator.expressionIsValid("+ ( - 1 )"));
     }
 
-    protected void prepare() {
+    @Test
+    public void prepare() {
         // Soma de número negativo '+-'
-        assertEquals("1-1", t.prepare("1+-1"));
+        assertEquals("1-1", calculator.prepare("1+-1"));
         // Operador '+' junto ao '-'
-        assertEquals("0-1", t.prepare("+-1"));
+        assertEquals("0-1", calculator.prepare("+-1"));
         // Operador '+' no início
-        assertEquals("0+1-2", t.prepare("+1+-2"));
+        assertEquals("0+1-2", calculator.prepare("+1+-2"));
         // Operador '-' no início
-        assertEquals("0-1-1", t.prepare("-1-1"));
+        assertEquals("0-1-1", calculator.prepare("-1-1"));
         // Multiplicação de número negativo '*-'
-        assertEquals("1*(0-1)*1", t.prepare("1*-1"));
+        assertEquals("1*(0-1)*1", calculator.prepare("1*-1"));
         // Multiplicação de número positivo '*+'
-        assertEquals("1*1", t.prepare("1*+1"));
+        assertEquals("1*1", calculator.prepare("1*+1"));
         // Divisão de número negativo '*-'
-        assertEquals("1*(0-1)/1", t.prepare("1/-1"));
+        assertEquals("1*(0-1)/1", calculator.prepare("1/-1"));
         // Divisão de número negativo '*+'
-        assertEquals("1/1", t.prepare("1/+1"));
+        assertEquals("1/1", calculator.prepare("1/+1"));
         // Operador '-' próximo a parênteses
-        assertEquals("0-(0-(0-15*(0-1)*10)))", t.prepare("-(-(-15*-10)))"));
+        assertEquals("0-(0-(0-15*(0-1)*10)))", calculator.prepare("-(-(-15*-10)))"));
     }
 
-    protected void postFix() {
+    @Test
+    public void postFix() {
         //Inválido
-        assertEquals("ERROR", t.postFix(""));
-        assertEquals("ERROR", t.postFix(" "));
-        assertEquals("ERROR", t.postFix(null));
-        assertEquals("ERROR", t.postFix("expression"));
+        assertEquals("ERROR", calculator.postFix(""));
+        assertEquals("ERROR", calculator.postFix(" "));
+        assertEquals("ERROR", calculator.postFix(null));
+        assertEquals("ERROR", calculator.postFix("expression"));
         //Número
-        assertEquals("10", t.postFix(10));                //valor inteiro
-        assertEquals("10,5", t.postFix((float) 10.5));         //valor fracionado
-        assertEquals("10,5", t.postFix(10.5));            //valor fracionado
-        assertEquals("0", t.postFix("0"));
-        assertEquals("0 1 -", t.postFix(-1));             //valor negativo
-        assertEquals("0 1 -", t.postFix("-1"));
-        assertEquals("0 0,1 -", t.postFix("-0,1"));       //valor fracionado
+        assertEquals("0", calculator.postFix("0"));
+        assertEquals("0 1 -", calculator.postFix("-1"));
+        assertEquals("0 0,1 -", calculator.postFix("-0,1"));       //valor fracionado
         //Expressão
-        assertEquals("0 1 - 1 +", t.postFix("- 1 + 1"));  //espaço
-        assertEquals("0 1 - 1 +", t.postFix("-1+1"));
-        assertEquals("0 1 + 2 -", t.postFix("0+1-2"));
-        assertEquals("1 2 + 3 +", t.postFix("1+2+3"));
-        assertEquals("1,1 1,1 +", t.postFix("1,1+1,1"));
-        assertEquals("1 1 1 + +", t.postFix("1+(1+1)"));
-        assertEquals("1 0,1 + 2 +", t.postFix("(1+0,1)+2"));
-        assertEquals("1 0,1 * 15 -", t.postFix("(1*0,1)-15"));
-        assertEquals("1 0,1 / 1 -", t.postFix("(1/0,1)+-1"));
-        assertEquals("1 0,1 / 0 1 - * 1 *", t.postFix("(1/0,1)*-1"));
-        assertEquals("1 0,1 / 0 1 - * 1 * 15 +", t.postFix("(1/0,1)*-1+15"));
-        assertEquals("1 0,1 / 0 1 - * 5 /", t.postFix("(1/0,1)/-5"));
-        assertEquals("1 0,1 / 0 1 - 1 + /", t.postFix("(1/0,1)/(-1+1)"));
-        assertEquals("1 1,1 - 0 5 - 1 + -", t.postFix("((1+-1,1))+-((-5+1))"));
-        assertEquals("0 0 1 - - 0 2 - 3 + -", t.postFix("-(((-1)))+-(((-2+3)))"));
-        assertEquals("0 0 1 - + 0 2 - 3 + -", t.postFix("+(((-1)))+-(((-2+3)))"));
-        assertEquals("1,0 4,0 +", t.postFix("1,0+4,0"));
-        assertEquals("1,0 4,0 + 2,0 + 3 +", t.postFix("1,0+4,0+2,0+3"));
-        assertEquals("5,0 1,0 -", t.postFix("5,0-1,0"));
-        assertEquals("5,0 2,0 - 2 -", t.postFix("5,0-2,0-2"));
-        assertEquals("5,0 2,0 *", t.postFix("5,0*2,0"));
-        assertEquals("5,0 2,0 * 2 *", t.postFix("5,0*2,0*2"));
-        assertEquals("10,0 2,0 /", t.postFix("10,0/2,0"));
-        assertEquals("10,0 2,0 / 2 / 10 /", t.postFix("10,0/2,0/2/10"));
-        assertEquals("10 10 + 5 2 * -", t.postFix("(10+10)-(5*2)"));
-        assertEquals("1,5 2,5 + 3 + 2,5 2,5 + -", t.postFix("(1,5+2,5+3)-(2,5+2,5)"));
-        assertEquals("5 0 1 - * 10 * 20 + 5 -", t.postFix("5*-10+20-5"));
-        assertEquals("2000 1 2 / +", t.postFix("2000+1/2"));
-        assertEquals("2 2 + 4 5 * + 1 1000 / +", t.postFix("2+2+4*5+1/1000"));
+        assertEquals("0 1 - 1 +", calculator.postFix("- 1 + 1"));  //espaço
+        assertEquals("0 1 - 1 +", calculator.postFix("-1+1"));
+        assertEquals("0 1 + 2 -", calculator.postFix("0+1-2"));
+        assertEquals("1 2 + 3 +", calculator.postFix("1+2+3"));
+        assertEquals("1,1 1,1 +", calculator.postFix("1,1+1,1"));
+        assertEquals("1 1 1 + +", calculator.postFix("1+(1+1)"));
+        assertEquals("1 0,1 + 2 +", calculator.postFix("(1+0,1)+2"));
+        assertEquals("1 0,1 * 15 -", calculator.postFix("(1*0,1)-15"));
+        assertEquals("1 0,1 / 1 -", calculator.postFix("(1/0,1)+-1"));
+        assertEquals("1 0,1 / 0 1 - * 1 *", calculator.postFix("(1/0,1)*-1"));
+        assertEquals("1 0,1 / 0 1 - * 1 * 15 +", calculator.postFix("(1/0,1)*-1+15"));
+        assertEquals("1 0,1 / 0 1 - * 5 /", calculator.postFix("(1/0,1)/-5"));
+        assertEquals("1 0,1 / 0 1 - 1 + /", calculator.postFix("(1/0,1)/(-1+1)"));
+        assertEquals("1 1,1 - 0 5 - 1 + -", calculator.postFix("((1+-1,1))+-((-5+1))"));
+        assertEquals("0 0 1 - - 0 2 - 3 + -", calculator.postFix("-(((-1)))+-(((-2+3)))"));
+        assertEquals("0 0 1 - + 0 2 - 3 + -", calculator.postFix("+(((-1)))+-(((-2+3)))"));
+        assertEquals("1,0 4,0 +", calculator.postFix("1,0+4,0"));
+        assertEquals("1,0 4,0 + 2,0 + 3 +", calculator.postFix("1,0+4,0+2,0+3"));
+        assertEquals("5,0 1,0 -", calculator.postFix("5,0-1,0"));
+        assertEquals("5,0 2,0 - 2 -", calculator.postFix("5,0-2,0-2"));
+        assertEquals("5,0 2,0 *", calculator.postFix("5,0*2,0"));
+        assertEquals("5,0 2,0 * 2 *", calculator.postFix("5,0*2,0*2"));
+        assertEquals("10,0 2,0 /", calculator.postFix("10,0/2,0"));
+        assertEquals("10,0 2,0 / 2 / 10 /", calculator.postFix("10,0/2,0/2/10"));
+        assertEquals("10 10 + 5 2 * -", calculator.postFix("(10+10)-(5*2)"));
+        assertEquals("1,5 2,5 + 3 + 2,5 2,5 + -", calculator.postFix("(1,5+2,5+3)-(2,5+2,5)"));
+        assertEquals("5 0 1 - * 10 * 20 + 5 -", calculator.postFix("5*-10+20-5"));
+        assertEquals("2000 1 2 / +", calculator.postFix("2000+1/2"));
+        assertEquals("2 2 + 4 5 * + 1 1000 / +", calculator.postFix("2+2+4*5+1/1000"));
     }
 
-    protected void resolve() {
+    @Test
+    public void resolve() {
         // Inválido
-        assertEquals("ERROR", t.resolve(""));
-        assertEquals("ERROR", t.resolve(" "));
-        assertEquals("ERROR", t.resolve(null));
-        assertEquals("ERROR", t.resolve("A"));
-        assertEquals("ERROR", t.resolve(",1"));
-        assertEquals("ERROR", t.resolve("(1 + 2)"));  // input: infix, esperado: posfix
+        assertEquals("ERROR", calculator.resolve(""));
+        assertEquals("ERROR", calculator.resolve(" "));
+        assertEquals("ERROR", calculator.resolve(null));
+        assertEquals("ERROR", calculator.resolve("A"));
+        assertEquals("ERROR", calculator.resolve(",1"));
+        assertEquals("ERROR", calculator.resolve(" 0"));       // não permitir iniciar com espaço
+        assertEquals("ERROR", calculator.resolve("(1 + 2)"));  // input: infix
         // Número
-        assertEquals("0", t.resolve("0"));
-        assertEquals("0", t.resolve(" 0"));
-        assertEquals("1,1", t.resolve("1,1"));
+        assertEquals("0,0", calculator.resolve("0"));
+        assertEquals("1,1", calculator.resolve("1,1"));
         // Expressão
-        assertEquals("0,25", t.resolve("10,0 2,0 / 2 / 10 /"));
-        assertEquals("10", t.resolve("10 10 + 5 2 * -"));
-        assertEquals("2", t.resolve("1,5 2,5 + 3 + 2,5 2,5 + -"));
-        assertEquals("-1", t.resolve("0 1 -"));
-        assertEquals("0", t.resolve("0 1 - 1 +"));
-        assertEquals("-1", t.resolve("0 1 + 2 -"));
-        assertEquals("6", t.resolve("1 2 + 3 +"));
-        assertEquals("2,2", t.resolve("1,1 1,1 +"));
-        assertEquals("3,1", t.resolve("1 0,1 + 2 +"));
-        assertEquals("-14,9", t.resolve("1 0,1 * 15 -"));
-        assertEquals("9", t.resolve("1 0,1 / 1 -"));
-        assertEquals("-10", t.resolve("1 0,1 / 0 1 - * 1 *"));
-        assertEquals("5", t.resolve("1 0,1 / 0 1 - * 1 * 15 +"));
-        assertEquals("-2", t.resolve("1 0,1 / 0 1 - * 5 /"));
-        assertEquals("ERROR", t.resolve("1 0,1 / 0 1 - 1 + /"));  // Divisão por zero
-        assertEquals("3,9", t.resolve("1 1,1 - 0 5 - 1 + -"));
-        assertEquals("0", t.resolve("0 0 1 - - 0 2 - 3 + -"));
-        assertEquals("-2", t.resolve("0 0 1 - + 0 2 - 3 + -"));
-        assertEquals("-35", t.resolve("5 0 1 - * 10 * 20 + 5 -"));
-        assertEquals("2000,5", t.resolve("2000 1 2 / +"));
-        assertEquals("24,001", t.resolve("2 2 + 4 5 * + 1 1000 / +"));
-        assertEquals("2", t.resolve("1,5 2,5 + 3 + 2,5 2,5 + -"));
-        assertEquals("757", t.resolve("100 200 + 2 / 5 * 7 +"));
-        assertEquals("-4", t.resolve("2 3 1 * + 9 -"));
-        assertEquals("23", t.resolve("10 2 8 * + 3 -"));
+        assertEquals("ERROR", calculator.resolve("1 0,1 / 0 1 - 1 + /"));  // Divisão por zero
+        assertEquals("0,25", calculator.resolve("10,0 2,0 / 2 / 10 /"));
+        assertEquals("10,0", calculator.resolve("10 10 + 5 2 * -"));
+        assertEquals("2,0", calculator.resolve("1,5 2,5 + 3 + 2,5 2,5 + -"));
+        assertEquals("-1,0", calculator.resolve("0 1 -"));
+        assertEquals("0,0", calculator.resolve("0 1 - 1 +"));
+        assertEquals("-1,0", calculator.resolve("0 1 + 2 -"));
+        assertEquals("6,0", calculator.resolve("1 2 + 3 +"));
+        assertEquals("2,2", calculator.resolve("1,1 1,1 +"));
+        assertEquals("3,1", calculator.resolve("1 0,1 + 2 +"));
+        assertEquals("-14,9", calculator.resolve("1 0,1 * 15 -"));
+        assertEquals("9,0", calculator.resolve("1 0,1 / 1 -"));
+        assertEquals("-10,0", calculator.resolve("1 0,1 / 0 1 - * 1 *"));
+        assertEquals("5,0", calculator.resolve("1 0,1 / 0 1 - * 1 * 15 +"));
+        assertEquals("-2,0", calculator.resolve("1 0,1 / 0 1 - * 5 /"));
+        assertEquals("3,9", calculator.resolve("1 1,1 - 0 5 - 1 + -"));
+        assertEquals("0,0", calculator.resolve("0 0 1 - - 0 2 - 3 + -"));
+        assertEquals("-2,0", calculator.resolve("0 0 1 - + 0 2 - 3 + -"));
+        assertEquals("-35,0", calculator.resolve("5 0 1 - * 10 * 20 + 5 -"));
+        assertEquals("2000,5", calculator.resolve("2000 1 2 / +"));
+        assertEquals("24,001", calculator.resolve("2 2 + 4 5 * + 1 1000 / +"));
+        assertEquals("2,0", calculator.resolve("1,5 2,5 + 3 + 2,5 2,5 + -"));
+        assertEquals("757,0", calculator.resolve("100 200 + 2 / 5 * 7 +"));
+        assertEquals("-4,0", calculator.resolve("2 3 1 * + 9 -"));
+        assertEquals("23,0", calculator.resolve("10 2 8 * + 3 -"));
     }
 
-    protected void calc() {
-        assertEquals("0,0", t.expressionCalc("0"));
-        assertEquals("1,0", t.expressionCalc("1"));
-        assertEquals("-1,0", t.expressionCalc("-1"));
-        assertEquals("0,0", t.expressionCalc("-1+1"));
-        assertEquals("-1,0", t.expressionCalc("0+1-2"));
-        assertEquals("6,0", t.expressionCalc("1+2+3"));
-        assertEquals("2,2", t.expressionCalc("1,1+1,1"));
-        assertEquals("3,1", t.expressionCalc("(1+0,1)+2"));
-        assertEquals("-14,9", t.expressionCalc("(1*0,1)-15"));
-        assertEquals("9,0", t.expressionCalc("(1/0,1)+-1"));
-        assertEquals("-10,0", t.expressionCalc("(1/0,1)*-1"));
-        assertEquals("-10,0", t.expressionCalc("(1/0,1)/-1"));
-        assertEquals("ERROR", t.expressionCalc("(1/0,1)/(-1+1)"));
-        assertEquals("3,9", t.expressionCalc("((1+-1,1))+-((-5+1))"));
-        assertEquals("0,0", t.expressionCalc("-(((-1)))+-(((-2+3)))"));
-        assertEquals("-35,0", t.expressionCalc("5*-10+20-5"));
-        assertEquals("2000,5", t.expressionCalc("2000+1/2"));
-        assertEquals("24,001", t.expressionCalc("2+2+4*5+1/1000"));
-        assertEquals("23,0", t.expressionCalc("((10 + (2 * 8)) - 3)"));
+    @Test
+    public void calc() {
+        assertEquals("ERROR", calculator.calculate(""));
+        assertEquals("ERROR", calculator.calculate(" "));
+        assertEquals("ERROR", calculator.calculate("A"));
+        assertEquals("ERROR", calculator.calculate("+"));
+        assertEquals("ERROR", calculator.calculate("- "));
+        assertEquals("ERROR", calculator.calculate("( "));
+        assertEquals("ERROR", calculator.calculate("()"));
+        assertEquals("ERROR", calculator.calculate(" *1"));
+        assertEquals("ERROR", calculator.calculate("/ 1"));
+        assertEquals("ERROR", calculator.calculate("1-"));
+        assertEquals("ERROR", calculator.calculate(" 1 - "));
+        assertEquals("ERROR", calculator.calculate("(1/0,1)/(-1+1)"));
+        assertEquals("1,0", calculator.calculate(" 1"));
+        assertEquals("1,0", calculator.calculate(" +1"));
+        assertEquals("0,0", calculator.calculate("0"));
+        assertEquals("1,0", calculator.calculate("1"));
+        assertEquals("-1,0", calculator.calculate("-1"));
+        assertEquals("0,0", calculator.calculate("-1+1"));
+        assertEquals("-1,0", calculator.calculate("0+1-2"));
+        assertEquals("6,0", calculator.calculate("1+2+3"));
+        assertEquals("2,2", calculator.calculate("1,1+1,1"));
+        assertEquals("3,1", calculator.calculate("(1+0,1)+2"));
+        assertEquals("-14,9", calculator.calculate("(1*0,1)-15"));
+        assertEquals("9,0", calculator.calculate("(1/0,1)+-1"));
+        assertEquals("-10,0", calculator.calculate("(1/0,1)*-1"));
+        assertEquals("-10,0", calculator.calculate("(1/0,1)/-1"));
+        assertEquals("3,9", calculator.calculate("((1+-1,1))+-((-5+1))"));
+        assertEquals("0,0", calculator.calculate("-(((-1)))+-(((-2+3)))"));
+        assertEquals("-35,0", calculator.calculate("5*-10+20-5"));
+        assertEquals("2000,5", calculator.calculate("2000+1/2"));
+        assertEquals("24,001", calculator.calculate("2+2+4*5+1/1000"));
+        assertEquals("23,0", calculator.calculate("((10 + (2 * 8)) - 3)"));
     }
 
-    protected void extra() {
+    @Test
+    public void extra() {
         // Outro delimitador
-        String value = t.postFix("1+2*5,0+-1", '|');
+        Calculator t1 = new Calculator('|');
+        String value = t1.postFix("1+2*5,0+-1");
         assertEquals("1|2|5,0|*|+|1|-", value);
-        String result = t.resolve(value, '|');
-        assertEquals("10", result);
+        String result = t1.resolve(value);
+        assertEquals("10,0", result);
     }
 
 }
