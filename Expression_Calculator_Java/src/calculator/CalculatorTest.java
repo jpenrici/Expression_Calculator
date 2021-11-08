@@ -1,4 +1,4 @@
-package calculator;
+package com.example.calculator;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -225,6 +225,8 @@ public class CalculatorTest {
         assertEquals("ERROR", calculator.calculate("/ 1"));
         assertEquals("ERROR", calculator.calculate("1-"));
         assertEquals("ERROR", calculator.calculate(" 1 - "));
+        assertEquals("ERROR", calculator.calculate(" 2 / * 3"));
+        assertEquals("ERROR", calculator.calculate(" 2 / * + 3"));
         assertEquals("ERROR", calculator.calculate("(1/0,1)/(-1+1)"));
         assertEquals("1,0", calculator.calculate(" 1"));
         assertEquals("1,0", calculator.calculate(" +1"));
@@ -246,6 +248,7 @@ public class CalculatorTest {
         assertEquals("2000,5", calculator.calculate("2000+1/2"));
         assertEquals("24,001", calculator.calculate("2+2+4*5+1/1000"));
         assertEquals("23,0", calculator.calculate("((10 + (2 * 8)) - 3)"));
+        assertEquals("0,6666666666666666", calculator.calculate("2 / 3"));
     }
 
     @Test

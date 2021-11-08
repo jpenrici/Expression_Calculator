@@ -1,4 +1,4 @@
-package calculator;
+package com.example.calculator;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -13,7 +13,7 @@ public class Calculator {
     protected static final char SEPARATOR = ',';
     protected static final char DELIMITER = ' ';
 
-    private static final String DIGITS = "0123456789";
+    protected static final String DIGITS = "0123456789";
     private static final String OPERATOR = "+-*/";
     private static final String SIGNAL = "+-";
 
@@ -58,6 +58,8 @@ public class Calculator {
             return ERROR;
         }
 
+        System.out.println(postfixExpression);
+
         List<String> tokens = new ArrayList<>();
         String[] array = postfixExpression.replace(currentDelimiter, ';').split(";");
         for (String token : array) {
@@ -73,7 +75,13 @@ public class Calculator {
         Stack<Double> numbers = new Stack<>();
         for (String token : tokens) {
             if (OPERATOR.contains(token)) {
+                if (numbers.isEmpty()) {
+                    return ERROR;
+                }
                 Double operand2 = numbers.pop();
+                if (numbers.isEmpty()) {
+                    return ERROR;
+                }
                 Double operand1 = numbers.pop();
                 switch (token) {
                     case "+":
@@ -107,7 +115,7 @@ public class Calculator {
         String result = numbers.pop().toString().replace(DOT, SEPARATOR);
         array = result.replace(SEPARATOR, ';').split(";");
         if (array.length == 2) {
-            if (Integer.parseInt(array[1]) == 0) {
+            if (Double.parseDouble(array[1]) == 0) {
                 result = array[0] + ",0";
             }
         }
